@@ -58,8 +58,10 @@ module.exports = {
 
     configureWebpack: {
         resolve: {
+            // extensions:['.js','json','.vue'],
             alias: {
-                '@': resolve('src')
+                '@': resolve('/src'),
+                '@c':resolve('/src/components')
             }
         }
     },
