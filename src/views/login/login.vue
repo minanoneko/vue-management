@@ -14,12 +14,12 @@
               <el-form-item label="重复密码" prop="passwords" v-if="model==='register'">
                 <el-input v-model="ruleForm.passwords" type="password" maxlength="16" minlength="6"></el-input>
               </el-form-item>
-               <div class="check">
+                <el-row class="code" :gutter="4">
                    <el-form-item label="验证码"  prop="checkCode">
-                       <el-input v-model="ruleForm.checkCode" maxlength="6" ></el-input>
-                       <div class="sendCheck" @click="getCode" >获取验证码</div>
+                       <el-col :span="15"><el-input v-model="ruleForm.checkCode" maxlength="6" ></el-input></el-col>
+                       <el-col :span="9"><div @click="getCode('ruleForm')" class="sendCode" :class="{'not-send':disabled}">{{disabled?`${this.time}秒后重新发送`:'发送验证码'}}</div></el-col>
                    </el-form-item>
-               </div>
+                </el-row>
                 <el-form-item >
                     <el-button type="primary" style="width: 100%;margin-top: 35px" @click="login('ruleForm')">{{model==='login'?'登录':'注册'}}</el-button>
                 </el-form-item>
@@ -30,6 +30,7 @@
 
 <script>
 import {stripscript,validateEmail} from "@/utils/validate";
+import {getSms} from "@/api/user/login";
 
 export default {
         name: "login",
@@ -43,6 +44,8 @@ export default {
                   cb(new Error('请输入验证码'))
               }else if(!reg.test(val)){
                 cb(new Error('验证码格式错误'))
+              }else {
+                  cb()
               }
             };
             //校验邮箱
@@ -57,11 +60,15 @@ export default {
             };
             //校验密码
             let checkPassword=(rule,val,cb)=>{
-              this.ruleForm.password=stripscript(val);
-              val=this.ruleForm.password
-              if(val===''){
-                cb(new Error('请输入密码'))
-              }
+                this.ruleForm.password=stripscript(val);
+                val=this.ruleForm.password
+                if(val===''){
+                    cb(new Error('请输入密码'))
+                }else if(val.length<6) {
+                    cb(new Error('密码必须小于6位数'))
+                }else {
+                    cb()
+                }
             }
             //校验二次密码
             let repeatPassword=(rule,val,cb)=>{
@@ -76,9 +83,11 @@ export default {
               }
             }
             return{
-              model:'login',
-              menuTab:[{text:'登录',isActive:true,type:'login'},{text:'注册',isActive:false,type:'register'}],
-              //表单数据
+                model:'login',
+                time:60,
+                disabled:false,
+                menuTab:[{text:'登录',isActive:true,type:'login'},{text:'注册',isActive:false,type:'register'}],
+                //表单数据
                 ruleForm:{
                     email:'',
                     password:'',
@@ -103,15 +112,49 @@ export default {
                     }
                 })
             },
-            getCode(){
-
+            getCode(formName){
+                //单独验证邮箱
+                this.$refs[formName].validateField('email',err=>{
+                    if(err){
+                        return
+                    }
+                    if(!this.disabled){
+                        this.disabled=true
+                        this.down()
+                        getSms(this.ruleForm.email).then(res=>{
+                            if(res.data.status===0){
+                                this.$message.success('验证码发送成功')
+                            }
+                        }).catch(err=>{
+                            console.log(err.data)
+                        })
+                    }
+                })
             },
+
+            //切换注册登录
             toggleMenu(data){
+                if(this.disabled){
+                    this.$message.warning('验证码发送中...')
+                    return
+                }
               this.menuTab.forEach(val=>{
                 val.isActive=false
               })
               data.isActive=true
               this.model=data.type
+            },
+
+            //倒计时
+            down(){
+               let clear=setInterval(()=>{
+                   this.time-=1;
+                   if(this.time<=0){
+                       this.time=60;
+                       this.disabled=false
+                       clearInterval(clear)
+                   }
+               },1000)
             }
         }
     }
@@ -143,22 +186,15 @@ export default {
                     margin-top: 10px;
                 }
             }
-            .check{
-                .el-form-item{
-                    .el-input{
-                        width: 65%;
-                    }
-                    .sendCheck{
-                        position: absolute;
-                        padding:0 15px;
-                        background: #2ecc71;
-                        color: white;
-                        border-radius: 4px;
-                        right: 0;
-                        top:0
-                    }
-                }
-            }
+          .code{
+              .sendCode{
+                  background: #1ec18a;
+                  text-align: center;
+                  border-radius: 5px;
+                  color: white;
+                  font-size: 15px;
+              }
+          }
         }
     }
     .font-block{
@@ -169,5 +205,12 @@ export default {
             color: white;
         }
     }
-
+    ::v-deep{
+        .el-form-item__error:nth-child(3){
+            left: 3px;
+        }
+    }
+    .not-send{
+        pointer-events:none
+    }
 </style>

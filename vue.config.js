@@ -83,20 +83,16 @@ module.exports = {
 
     devServer: {
         port: 8080,
-        host: "localhost",
         https: false,
-        // 自动启动浏览器
-        open: true,
-        hot: true,
         proxy: {
-            "/api": {
+            "/dev-api": {
                 //代理路径 例如 https://baidu.com
-                target: "http://localhost:8082",
+                target: "http://localhost:8081",
                 // 将主机标头的原点更改为目标URL
                 changeOrigin: true,
                 ws: true,
                 pathRewrite: {
-                    "^/api": ""
+                    "^/dev-api": ""
                 },
                 secure: false, // 使用的是http协议则设置为false，https协议则设置为true
                 changOrigin: true,
