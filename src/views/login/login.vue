@@ -30,7 +30,7 @@
 
 <script>
 import {stripscript,validateEmail} from "@/utils/validate";
-import {getSms} from "@/api/user/login";
+import {getSms,reg} from "@/api/user/login";
 
 export default {
         name: "login",
@@ -86,6 +86,7 @@ export default {
                 model:'login',
                 time:60,
                 disabled:false,
+                code:'',
                 menuTab:[{text:'登录',isActive:true,type:'login'},{text:'注册',isActive:false,type:'register'}],
                 //表单数据
                 ruleForm:{
@@ -107,6 +108,13 @@ export default {
                 //表单验证
                 this.$refs[formName].validate((valid)=>{
                     if(valid){
+                        if(this.model==='login'){
+
+                        }else {
+                            reg(this.ruleForm).then(res=>{
+                                this.$message.success('注册成功')
+                            })
+                        }
                     }else {
                         return false
                     }
@@ -119,15 +127,11 @@ export default {
                         return
                     }
                     if(!this.disabled){
-                        this.disabled=true
-                        this.down()
-                        getSms(this.ruleForm.email).then(res=>{
-                            if(res.data.status===0){
-                                this.$message.success('验证码发送成功')
-                            }
-                        }).catch(err=>{
-                            console.log(err.data)
-                        })
+                        getSms(this.ruleForm.email,this.model).then(res=>{
+                            this.disabled=true
+                            this.$message.success('验证码发送成功')
+                            this.down()
+                        }).catch(err=>{})
                     }
                 })
             },
@@ -138,11 +142,12 @@ export default {
                     this.$message.warning('验证码发送中...')
                     return
                 }
-              this.menuTab.forEach(val=>{
-                val.isActive=false
-              })
-              data.isActive=true
-              this.model=data.type
+                this.menuTab.forEach(val=>{
+                    val.isActive=false
+                })
+                data.isActive=true
+                this.$refs['ruleForm'].resetFields();
+                this.model=data.type
             },
 
             //倒计时

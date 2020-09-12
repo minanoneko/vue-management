@@ -84,9 +84,9 @@ module.exports = {
     devServer: {
         port: 8080,
         https: false,
+        open:true,
         proxy: {
             "/dev-api": {
-                //代理路径 例如 https://baidu.com
                 target: "http://localhost:8081",
                 // 将主机标头的原点更改为目标URL
                 changeOrigin: true,
