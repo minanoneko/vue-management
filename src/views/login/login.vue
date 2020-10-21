@@ -21,7 +21,7 @@
                    </el-form-item>
                 </el-row>
                 <el-form-item >
-                    <el-button type="primary" style="width: 100%;margin-top: 35px" @click="login('ruleForm')">{{model==='login'?'登录':'注册'}}</el-button>
+                    <el-button type="primary" style="width: 100%;margin-top: 35px" @click="btn('ruleForm')">{{model==='login'?'登录':'注册'}}</el-button>
                 </el-form-item>
             </el-form>
         </div>
@@ -65,7 +65,7 @@ export default {
                 if(val===''){
                     cb(new Error('请输入密码'))
                 }else if(val.length<6) {
-                    cb(new Error('密码必须小于6位数'))
+                    cb(new Error('密码必须大于6位数'))
                 }else {
                     cb()
                 }
@@ -104,7 +104,7 @@ export default {
             }
         },
         methods:{
-            login(formName){
+            btn(formName){
                 //表单验证
                 this.$refs[formName].validate((valid)=>{
                     if(valid){
