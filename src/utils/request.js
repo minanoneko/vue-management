@@ -3,7 +3,7 @@ import {Message} from "element-ui";
 
 const instance = axios.create({
     baseURL:'dev-api',
-    timeout:1000
+    timeout:10000
 });
 
 //请求拦截器

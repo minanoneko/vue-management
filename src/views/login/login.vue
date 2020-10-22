@@ -21,7 +21,7 @@
                    </el-form-item>
                 </el-row>
                 <el-form-item >
-                    <el-button type="primary" style="width: 100%;margin-top: 35px" @click="btn('ruleForm')">{{model==='login'?'登录':'注册'}}</el-button>
+                    <el-button type="primary" style="width: 100%;margin-top: 35px" @click="btn('ruleForm')" :disabled="!disabled">{{model==='login'?'登录':'注册'}}</el-button>
                 </el-form-item>
             </el-form>
         </div>
@@ -112,7 +112,13 @@ export default {
 
                         }else {
                             reg(this.ruleForm).then(res=>{
-                                this.$message.success('注册成功')
+                                this.$message({
+                                    type:"success",
+                                    message:'注册成功',
+                                    onClose(){
+                                        location.reload();
+                                    }
+                                })
                             })
                         }
                     }else {
