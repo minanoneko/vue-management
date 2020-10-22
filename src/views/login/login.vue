@@ -17,7 +17,7 @@
                 <el-row class="code" :gutter="4">
                    <el-form-item label="验证码"  prop="checkCode">
                        <el-col :span="15"><el-input v-model="ruleForm.checkCode" maxlength="6" ></el-input></el-col>
-                       <el-col :span="9"><div @click="getCode('ruleForm')" class="sendCode" :class="{'not-send':disabled}">{{disabled?`${this.time}秒后重新发送`:'发送验证码'}}</div></el-col>
+                       <el-col :span="9"><div @click="getCode('ruleForm')" class="sendCode" :class="{'not-send':disabled}">{{codeText}}</div></el-col>
                    </el-form-item>
                 </el-row>
                 <el-form-item >
@@ -87,6 +87,7 @@ export default {
                 time:60,
                 disabled:false,
                 code:'',
+                codeText:'发送验证码',
                 menuTab:[{text:'登录',isActive:true,type:'login'},{text:'注册',isActive:false,type:'register'}],
                 //表单数据
                 ruleForm:{
@@ -133,11 +134,15 @@ export default {
                         return
                     }
                     if(!this.disabled){
+                        this.codeText='发送中...'
+                        this.disabled=true
                         getSms(this.ruleForm.email,this.model).then(res=>{
-                            this.disabled=true
-                            this.$message.success('验证码发送成功')
                             this.down()
-                        }).catch(err=>{})
+                            this.codeText=`${this.time}秒后重新发送`
+                        }).catch(err=>{
+                            this.codeText='发送验证码'
+                            this.disabled=false
+                        })
                     }
                 })
             },
@@ -158,12 +163,16 @@ export default {
 
             //倒计时
             down(){
+                //判断定时器是否存在
+                if(clear){clearInterval(clear)}
+
                let clear=setInterval(()=>{
                    this.time-=1;
                    if(this.time<=0){
                        this.time=60;
                        this.disabled=false
                        clearInterval(clear)
+                       this.codeText='重新发送'
                    }
                },1000)
             }
