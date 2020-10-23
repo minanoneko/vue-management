@@ -30,7 +30,7 @@
 
 <script>
 import {stripscript,validateEmail} from "@/utils/validate";
-import {getSms,reg} from "@/api/user/login";
+import {getSms,reg,login} from "@/api/user/login";
 
 export default {
         name: "login",
@@ -110,23 +110,20 @@ export default {
                 this.$refs[formName].validate((valid)=>{
                     if(valid){
                         if(this.model==='login'){
-
-                        }else {
-                            reg(this.ruleForm).then(res=>{
-                                this.$message({
-                                    type:"success",
-                                    message:'注册成功',
-                                    onClose(){
-                                        location.reload();
-                                    }
-                                })
+                            this.login({
+                                email:this.ruleForm.email,
+                                password:this.ruleForm.password,
+                                code:this.ruleForm.checkCode
                             })
+                        }else {
+                            this.register(this.ruleForm)
                         }
                     }else {
                         return false
                     }
                 })
             },
+            //获取验证码
             getCode(formName){
                 //单独验证邮箱
                 this.$refs[formName].validateField('email',err=>{
@@ -138,13 +135,33 @@ export default {
                         this.disabled=true
                         getSms(this.ruleForm.email,this.model).then(res=>{
                             this.down()
-                            this.codeText=`${this.time}秒后重新发送`
                         }).catch(err=>{
                             this.codeText='发送验证码'
                             this.disabled=false
                         })
                     }
                 })
+            },
+
+            //登录
+            login(loginData){
+                login(loginData).then(res=>{
+                    this.$message.success('登录成功')
+                }).catch(err=>{})
+            },
+
+            //注册
+            register(ruleForm){
+                reg(ruleForm).then(res=>{
+                    this.$message({
+                        type:"success",
+                        message:'注册成功,请重新登录',
+                        duration:650,
+                        onClose:()=>{
+                            location.reload();
+                        }
+                    })
+                }).catch(err=>{})
             },
 
             //切换注册登录
@@ -165,9 +182,12 @@ export default {
             down(){
                 //判断定时器是否存在
                 if(clear){clearInterval(clear)}
-
+                if(this.codeText==='重新发送'){
+                    this.codeText='发送验证码'
+                }
                let clear=setInterval(()=>{
                    this.time-=1;
+                   this.codeText=`${this.time}秒后重新发送`
                    if(this.time<=0){
                        this.time=60;
                        this.disabled=false

@@ -98,7 +98,5 @@ module.exports = {
                 changOrigin: true,
             }
         }
-
     }
-
 };
