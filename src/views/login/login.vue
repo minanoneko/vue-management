@@ -84,7 +84,6 @@ export default {
             }
             return{
                 model:'login',
-                time:60,
                 disabled:false,
                 code:'',
                 codeText:'发送验证码',
@@ -134,7 +133,7 @@ export default {
                         this.codeText='发送中...'
                         this.disabled=true
                         getSms(this.ruleForm.email,this.model).then(res=>{
-                            this.down()
+                            this.down(60)
                         }).catch(err=>{
                             this.codeText='发送验证码'
                             this.disabled=false
@@ -170,6 +169,9 @@ export default {
                     this.$message.warning('验证码发送中...')
                     return
                 }
+                if(this.codeText==='重新发送'){
+                    this.codeText='发送验证码'
+                }
                 this.menuTab.forEach(val=>{
                     val.isActive=false
                 })
@@ -179,17 +181,13 @@ export default {
             },
 
             //倒计时
-            down(){
+            down(number){
                 //判断定时器是否存在
                 if(clear){clearInterval(clear)}
-                if(this.codeText==='重新发送'){
-                    this.codeText='发送验证码'
-                }
                let clear=setInterval(()=>{
-                   this.time-=1;
-                   this.codeText=`${this.time}秒后重新发送`
-                   if(this.time<=0){
-                       this.time=60;
+                   number--;
+                   this.codeText=`${number}秒后重新发送`
+                   if(number<=0){
                        this.disabled=false
                        clearInterval(clear)
                        this.codeText='重新发送'
