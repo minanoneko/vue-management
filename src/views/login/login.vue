@@ -186,13 +186,24 @@ export default {
                 if(clear){clearInterval(clear)}
                let clear=setInterval(()=>{
                    number--;
+                   window.sessionStorage.setItem('re_time',number)  //记录倒计时
                    this.codeText=`${number}秒后重新发送`
+                   if(window.sessionStorage.getItem('re_time')<='0'){   //清除缓存
+                       window.sessionStorage.removeItem('re_time')
+                   }
                    if(number<=0){
                        this.disabled=false
                        clearInterval(clear)
                        this.codeText='重新发送'
                    }
                },1000)
+            }
+        },
+        created(){
+            //判断倒计时是否结束
+            if(window.sessionStorage.getItem('re_time')>0){
+                this.down(Number(window.sessionStorage.getItem('re_time')))
+                this.disabled=true
             }
         }
     }
