@@ -7,10 +7,10 @@ const instance = axios.create({
 });
 
 //请求拦截器
-instance.interceptors.request.use(function (config) {
+instance.interceptors.request.use(config=> {
     // 在发送请求之前做些什么
     return config;
-}, function (error) {
+},  error=> {
     // 对请求错误做些什么
     return Promise.reject(error);
 });
